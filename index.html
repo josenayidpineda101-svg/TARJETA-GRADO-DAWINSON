@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Felicitaciones Contador Público</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --espresso: #120A07;
+            --ivory: #FCFAF5;
+            --gold-light: #FDF2A6;
+            --gold-mid: #C59B42;
+            --gold-dark: #8F6317;
+            --text-color: #2D1E17;
+            --terracotta: #9B311B;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: radial-gradient(circle at center, #2A1711 0%, var(--espresso) 100%);
+            font-family: 'Lato', sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #confetti-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        /* Contenedor principal y Parallax */
+        .view-container {
+            perspective: 1200px;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card-wrapper {
+            width: 90%;
+            max-width: 480px;
+            height: 650px;
+            transition: transform 0.1s ease;
+            transform-style: preserve-3d;
+        }
+
+        /* Tarjeta Giratoria */
+        .card {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.6);
+            border-radius: 6px;
+        }
+
+        .card.is-flipped {
+            transform: rotateY(180deg);
+        }
+
+        /* Caras de la Tarjeta */
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            background-color: var(--ivory);
+            background-image: url('https://www.transparenttextures.com/patterns/cream-paper.png');
+            border-radius: 6px;
+            padding: 20px;
+        }
+
+        .back-face {
+            transform: rotateY(180deg);
+        }
+
+        /* Marcos Interiores */
+        .gold-border {
+            width: 100%;
+            height: 100%;
+            border: 2px solid var(--gold-mid);
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+        }
+
+        .gold-border::before {
+            content: '';
+            position: absolute;
+            top: 6px; left: 6px; right: 6px; bottom: 6px;
+            border: 1px solid rgba(197, 155, 66, 0.4);
+        }
+
+        /* Tipografía */
+        .icon-container {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+        }
+
+        .title {
+            font-family: 'Cinzel', serif;
+            font-size: clamp(2.5rem, 8vw, 3.8rem);
+            background: linear-gradient(to right, var(--gold-dark), var(--gold-light), var(--gold-dark));
+            -webkit-background-clip: text;
+            color: transparent;
+            margin-bottom: 5px;
+        }
+
+        .title-small {
+            font-family: 'Cinzel', serif;
+            font-size: clamp(1.8rem, 5vw, 2.2rem);
+            background: linear-gradient(to right, var(--gold-dark), var(--gold-light), var(--gold-dark));
+            -webkit-background-clip: text;
+            color: transparent;
+            margin-bottom: 25px;
+        }
+
+        .subtitle {
+            font-size: clamp(0.9rem, 3vw, 1.1rem);
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: var(--terracotta);
+            font-weight: 700;
+            margin-bottom: 40px;
+        }
+
+        .text-content p {
+            color: var(--text-color);
+            font-size: clamp(0.95rem, 2.5vw, 1.05rem);
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .highlight-box {
+            background: rgba(197, 155, 66, 0.1);
+            border-left: 3px solid var(--gold-mid);
+            padding: 15px;
+            margin: 20px 0;
+        }
+
+        .highlight-box p {
+            color: var(--text-color);
+            margin: 0;
+        }
+
+        /* Mensaje Genérico de Cierre */
+        .closing-message {
+            font-family: 'Cinzel', serif;
+            font-style: italic;
+            font-size: 1.2rem;
+            color: var(--terracotta);
+            margin-top: 15px;
+            font-weight: 600;
+        }
+
+        /* Diseño del Sello de Cera Realista */
+        .seal-container {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .seal-hint {
+            font-family: 'Lato', sans-serif;
+            font-size: 0.85rem;
+            color: var(--terracotta);
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            animation: pulseHint 2s infinite;
+        }
+
+        @keyframes pulseHint {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 1; }
+        }
+
+        .wax-seal {
+            width: 90px;
+            height: 90px;
+            background: radial-gradient(circle at 35% 35%, #f75d45 0%, #ba2812 35%, #7a1505 75%, #360801 100%);
+            border: none;
+            border-radius: 48% 52% 47% 53% / 51% 49% 52% 48%;
+            box-shadow: 
+                0 10px 20px rgba(0,0,0,0.6),
+                inset 0 4px 6px rgba(255,255,255,0.3),
+                inset 0 -4px 6px rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s ease;
+            z-index: 10;
+        }
+
+        .wax-seal::after {
+            content: '';
+            position: absolute;
+            width: 66px;
+            height: 66px;
+            border: 2px solid rgba(0,0,0,0.15);
+            border-radius: 50%;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.4), 0 2px 2px rgba(255,255,255,0.2);
+        }
+
+        .wax-seal:hover {
+            transform: scale(1.08) rotate(5deg);
+        }
+
+        .wax-seal.broken {
+            transform: scale(1.4);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .seal-monogram {
+            font-family: 'Cinzel', serif;
+            color: #ffcda8;
+            font-size: 2.2rem;
+            font-weight: bold;
+            text-shadow: -1px -1px 1px rgba(0,0,0,0.7), 1px 1px 1px rgba(255,255,255,0.3);
+            z-index: 2;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="confetti-canvas"></canvas>
+
+    <div class="view-container">
+        <div class="card-wrapper" id="card-wrapper">
+            <div class="card" id="interactive-card">
+                
+                <!-- CARA FRONTAL (PORTADA) -->
+                <div class="card-face front-face">
+                    <div class="gold-border">
+                        <div class="icon-container">
+                            <svg viewBox="0 0 24 24" stroke="url(#gold-gradient-svg)" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                <defs>
+                                    <linearGradient id="gold-gradient-svg" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" stop-color="#C59B42" />
+                                        <stop offset="50%" stop-color="#FDF2A6" />
+                                        <stop offset="100%" stop-color="#8F6317" />
+                                    </linearGradient>
+                                </defs>
+                                <path d="M12 19l7-7 3 3-7 7-3-3z"></path>
+                                <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path>
+                                <path d="M2 2l7.586 7.586"></path>
+                                <circle cx="11" cy="11" r="2"></circle>
+                            </svg>
+                        </div>
+                        
+                        <h1 class="title">¡Felicidades!</h1>
+                        <p class="subtitle">Contador Público</p>
+                        
+                        <div class="seal-container">
+                            <p class="seal-hint" id="seal-hint">Haz clic para romper el sello</p>
+                            <button class="wax-seal" id="wax-seal" aria-label="Romper sello y abrir">
+                                <span class="seal-monogram">CP</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARA TRASERA (INTERIOR) -->
+                <div class="card-face back-face">
+                    <div class="gold-border">
+                        <h2 class="title-small">Una Meta Alcanzada</h2>
+                        
+                        <div class="text-content">
+                            <p>Nos llena de muchísima alegría verte alcanzar esta gran meta para tu vida y culminar con éxito tu proceso para convertirte oficialmente en <strong>Contador Público</strong>.</p>
+                            <p>Sabemos la inmensa constancia que te tomó llegar hasta aquí. Como un logro tan importante merece ser festejado como se debe, queremos celebrar junto a ti este triunfo.</p>
+                        </div>
+                        
+                        <div class="highlight-box">
+                            <p>Te esperamos este <strong>Viernes a partir de las 6:00 P.M.</strong> para reunirnos, brindar por tu éxito y compartir todos juntos la enorme alegría de verte llegar tan lejos.</p>
+                        </div>
+                        
+                        <p class="closing-message">¡Con todo nuestro cariño, te esperamos!</p>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            const cardWrapper = document.getElementById('card-wrapper');
+            const interactiveCard = document.getElementById('interactive-card');
+            const sealBtn = document.getElementById('wax-seal');
+            const sealHint = document.getElementById('seal-hint');
+            const canvas = document.getElementById('confetti-canvas');
+            const ctx = canvas.getContext('2d');
+            
+            let particles = [];
+            let isCanvasActive = false;
+            let isFlipped = false;
+
+            // Parallax en 3D
+            document.addEventListener('mousemove', (e) => {
+                if (!cardWrapper) return;
+                const xAxis = (window.innerWidth / 2 - e.pageX) / 35;
+                const yAxis = (window.innerHeight / 2 - e.pageY) / 35;
+                cardWrapper.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
+            });
+
+            document.addEventListener('mouseleave', () => {
+                if (cardWrapper) cardWrapper.style.transform = `rotateY(0deg) rotateX(0deg)`;
+            });
+
+            // Lógica de Romper el Sello y Girar la Tarjeta
+            sealBtn.addEventListener('click', () => {
+                sealBtn.classList.add('broken');
+                sealHint.style.opacity = '0';
+                
+                setTimeout(() => {
+                    interactiveCard.classList.add('is-flipped');
+                    isFlipped = true;
+                    triggerConfetti(); // Explota el confeti al revelar el mensaje
+                }, 400);
+            });
+
+            // Configuración del Confeti
+            function resizeCanvas() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+            
+            window.addEventListener('resize', resizeCanvas);
+            resizeCanvas();
+
+            function triggerConfetti() {
+                const colors = ['#C59B42', '#FDF2A6', '#9B311B', '#FFFFFF'];
+                for (let i = 0; i < 150; i++) {
+                    particles.push({
+                        x: canvas.width / 2,
+                        y: canvas.height / 2 + 50,
+                        vx: (Math.random() - 0.5) * 30,
+                        vy: (Math.random() - 1) * 25 - 5,
+                        size: Math.random() * 6 + 4,
+                        color: colors[Math.floor(Math.random() * colors.length)],
+                        tiltAngle: Math.random() * Math.PI
+                    });
+                }
+                
+                if (!isCanvasActive) {
+                    isCanvasActive = true;
+                    animateConfetti();
+                }
+            }
+
+            function animateConfetti() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                let activeParticles = false;
+
+                particles.forEach((p, index) => {
+                    p.tiltAngle += 0.1;
+                    p.vy += 0.25; 
+                    p.x += p.vx;
+                    p.y += p.vy;
+
+                    if (p.y < canvas.height) {
+                        activeParticles = true;
+                        ctx.beginPath();
+                        ctx.lineWidth = p.size;
+                        ctx.strokeStyle = p.color;
+                        ctx.moveTo(p.x + Math.sin(p.tiltAngle) * p.size, p.y);
+                        ctx.lineTo(p.x, p.y + p.size);
+                        ctx.stroke();
+                    }
+                });
+
+                if (activeParticles) {
+                    requestAnimationFrame(animateConfetti);
+                } else {
+                    isCanvasActive = false;
+                    particles = [];
+                }
+            }
+        })();
+    </script>
+</body>
+</html>
